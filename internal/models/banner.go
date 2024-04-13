@@ -14,5 +14,5 @@ type Banner struct {
 
 type BannerDefinition struct {
 	FeatureID int
-	TagIDs    []int
+	TagID     int
 }
