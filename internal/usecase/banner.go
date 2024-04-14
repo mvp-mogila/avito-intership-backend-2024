@@ -66,19 +66,22 @@ func (u *BannerUsecase) Get(ctx context.Context, params models.BannerDefinition)
 			return banner, err
 		}
 		u.bannerCache.Set(params.FeatureID, params.TagID, banner)
+		log.Printf("\n\nPut in cache\n\n")
 		return banner, nil
 	}
 
 	banner, err := u.bannerCache.Get(params.FeatureID, params.TagID)
 	if err != nil {
-		log.Println("Not found in cache")
+		log.Printf("\n\nNot found in cache\n\n")
 		banner, err = u.bannerRepo.Get(ctx, params)
 		if err != nil {
 			return banner, err
 		}
 		u.bannerCache.Set(params.FeatureID, params.TagID, banner)
+		log.Printf("\n\nPut in cache\n\n")
+		return banner, nil
 	}
-	log.Println("Found in cache")
+	log.Printf("\n\nFound in cache\n\n")
 	return banner, nil
 }
 

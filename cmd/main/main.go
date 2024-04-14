@@ -4,8 +4,6 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -50,18 +48,11 @@ func main() {
 		Handler: router,
 	}
 
-	go func() {
-		err := srv.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
-			log.Fatal("Fatal error")
-		}
-		log.Printf("server is listening on %s...", srv.Addr)
-	}()
-
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, os.Kill)
-	_ = <-c
+	err = srv.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
+		log.Fatal("Fatal error")
+	}
+	log.Printf("server is listening on %s...", srv.Addr)
 
 	waitTime, err := time.ParseDuration(cfg.CloseTime)
 	if err != nil {
@@ -74,6 +65,5 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal("Shutdown failed")
 	}
-
 	log.Println("Server stopped")
 }
