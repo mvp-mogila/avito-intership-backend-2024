@@ -1,0 +1,16 @@
+redis:
+  host: "localhost"
+  port: "6379"
+  exp_time: 5
+postgres:
+  host: "localhost"
+  port: "5432"
+  user: "postgres"
+  password: "postgres"
+  database: "banners"
+  sslmode: "disable"
+  max_open_conns: 10
+  max_idle_time: 30
+auth:
+  admin_token: "admin_token"
+  user_token: "user_token"
