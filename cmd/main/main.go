@@ -1,10 +1,8 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/mvp-mogila/avito-intership-backend-2024/internal/config"
@@ -47,23 +45,9 @@ func main() {
 		Addr:    cfg.Addr,
 		Handler: router,
 	}
-
+	log.Printf("server is listening on %s...", srv.Addr)
 	err = srv.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		log.Fatal("Fatal error")
 	}
-	log.Printf("server is listening on %s...", srv.Addr)
-
-	waitTime, err := time.ParseDuration(cfg.CloseTime)
-	if err != nil {
-		waitTime = 5 * time.Second
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), waitTime)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Shutdown failed")
-	}
-	log.Println("Server stopped")
 }

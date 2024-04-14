@@ -1,5 +1,4 @@
 addr: ":8080"
-close_time: "10s"
 redis:
   host: "localhost"
   port: "6379"
