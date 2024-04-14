@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/mvp-mogila/avito-intership-backend-2024/internal/models"
@@ -16,7 +17,6 @@ type Users interface {
 
 type AdminStatusKey struct{}
 
-// TODO: get user banner - only for user
 func Authentication(userUsecase Users) mux.MiddlewareFunc {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -24,6 +24,10 @@ func Authentication(userUsecase Users) mux.MiddlewareFunc {
 
 			var ctx context.Context
 			if userUsecase.CheckAdmin(token) {
+				if strings.Contains(r.URL.String(), "user") {
+					utils.SendErrorResponse(w, http.StatusForbidden, "")
+					return
+				}
 				ctx = context.WithValue(context.Background(), AdminStatusKey{}, true)
 			} else if userUsecase.CheckUser(token) {
 				ctx = context.WithValue(context.Background(), AdminStatusKey{}, false)
