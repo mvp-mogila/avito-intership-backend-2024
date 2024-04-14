@@ -26,9 +26,15 @@ func NewRedisCache(cfg config.RedisConfig) (st.Cache, error) {
 		return nil, status.Err()
 	}
 	log.Println("redis connection opened ...")
+
+	expTime, err := time.ParseDuration(cfg.ExpTime)
+	if err != nil {
+		expTime = 5 * time.Minute
+	}
+
 	return &RedisCache{
 		client:         redisClient,
-		expirationTime: cfg.ExpTime,
+		expirationTime: expTime,
 	}, nil
 }
 

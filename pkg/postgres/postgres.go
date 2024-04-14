@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib" // postgres driver
 	"github.com/jmoiron/sqlx"
@@ -34,7 +33,6 @@ func NewPgxDatabase(cfg config.PostgresConfig) (st.Database, error) {
 	}
 	log.Println("postgres connection opened ...")
 	dbClient.SetMaxOpenConns(cfg.MaxOpenConns)
-	dbClient.SetConnMaxIdleTime(time.Second * time.Duration(cfg.MaxIdleTime))
 	return &PgxDatabase{
 		dsn:    dsn,
 		client: dbClient,

@@ -2,7 +2,6 @@ package config
 
 import (
 	"log"
-	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -10,9 +9,11 @@ import (
 const _configpath = "config.yaml"
 
 type Config struct {
-	Postgres PostgresConfig `yaml:"postgres"`
-	Redis    RedisConfig    `yaml:"redis"`
-	Auth     AuthConfig     `yaml:"auth"`
+	Postgres  PostgresConfig `yaml:"postgres"`
+	Redis     RedisConfig    `yaml:"redis"`
+	Auth      AuthConfig     `yaml:"auth"`
+	Addr      string         `yaml:"addr"`
+	CloseTime string         `yaml:"close_time"`
 }
 
 type AuthConfig struct {
@@ -28,13 +29,12 @@ type PostgresConfig struct {
 	Database     string `yaml:"database"`
 	Sslmode      string `yaml:"sslmode"`
 	MaxOpenConns int    `yaml:"max_open_conns"`
-	MaxIdleTime  int    `yaml:"max_idle_time"`
 }
 
 type RedisConfig struct {
-	Host    string        `yaml:"Host"`
-	Port    string        `yaml:"port"`
-	ExpTime time.Duration `yaml:"expiration_time"`
+	Host    string `yaml:"Host"`
+	Port    string `yaml:"port"`
+	ExpTime string `yaml:"expiration_time"`
 }
 
 func GetConfig() *Config {

@@ -1,7 +1,9 @@
+addr: ":8080"
+close_time: "10s"
 redis:
   host: "localhost"
   port: "6379"
-  exp_time: 5
+  exp_time: 5m
 postgres:
   host: "localhost"
   port: "5432"
@@ -10,7 +12,6 @@ postgres:
   database: "banners"
   sslmode: "disable"
   max_open_conns: 10
-  max_idle_time: 30
 auth:
   admin_token: "admin_token"
   user_token: "user_token"
