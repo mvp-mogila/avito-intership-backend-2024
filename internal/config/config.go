@@ -9,10 +9,11 @@ import (
 const _configpath = "config.yaml"
 
 type Config struct {
-	Postgres PostgresConfig `yaml:"postgres"`
-	Redis    RedisConfig    `yaml:"redis"`
-	Auth     AuthConfig     `yaml:"auth"`
-	Addr     string         `yaml:"addr"`
+	Postgres  PostgresConfig `yaml:"postgres"`
+	Redis     RedisConfig    `yaml:"redis"`
+	Auth      AuthConfig     `yaml:"auth"`
+	Addr      string         `yaml:"addr"`
+	CloseTime string         `yaml:"close_time"`
 }
 
 type AuthConfig struct {
