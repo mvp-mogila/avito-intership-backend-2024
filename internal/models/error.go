@@ -7,4 +7,5 @@ var (
 	ErrInternal   = errors.New("internal server error")
 	ErrNoBanner   = errors.New("banners not found")
 	ErrNoAuth     = errors.New("no authentication")
+	ErrEmptyCache = errors.New("not found in cache")
 )

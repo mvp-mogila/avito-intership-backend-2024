@@ -1,14 +1,16 @@
 package usecase
 
+import "github.com/mvp-mogila/avito-intership-backend-2024/internal/config"
+
 type UserUsecase struct {
 	adminToken string
 	userToken  string
 }
 
-func NewUserUsecase(admToken, usrToken string) *UserUsecase {
+func NewUserUsecase(cfg config.AuthConfig) *UserUsecase {
 	return &UserUsecase{
-		adminToken: admToken,
-		userToken:  usrToken,
+		adminToken: cfg.AdminToken,
+		userToken:  cfg.UserToken,
 	}
 }
 
