@@ -46,7 +46,7 @@ func main() {
 		Handler: router,
 	}
 
-	log.Println("start listening om port 8080 ...")
+	log.Println("server is listening on port 8080 ...")
 	if err = srv.ListenAndServe(); err != nil {
 		log.Fatal("Fatal error")
 	}

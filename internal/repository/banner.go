@@ -3,8 +3,10 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/mvp-mogila/avito-intership-backend-2024/internal/models"
 	st "github.com/mvp-mogila/avito-intership-backend-2024/internal/pkg/storage"
@@ -21,10 +23,10 @@ func NewBannerRepo(d st.Database) *BannerRepo {
 	}
 }
 
-// TODO: duplicate banners
 func (r *BannerRepo) Create(ctx context.Context, bannerData models.Banner) (int, error) {
 	tx, err := r.bannerStorage.Begin(ctx, &sql.TxOptions{})
 	if err != nil {
+		log.Println(err.Error())
 		return 0, models.ErrInternal
 	}
 
@@ -33,23 +35,23 @@ func (r *BannerRepo) Create(ctx context.Context, bannerData models.Banner) (int,
 	var bannerID int
 	err = tx.Get(&bannerID, q, bannerData.Content, bannerData.IsActive)
 	if err != nil {
+		log.Println(err.Error())
 		tx.Rollback()
-		// if errors.Is(err, sql.ErrNoRows) {
-		// 	return 0, models.ErrDuplicateBanners
-		// }
-		return 0, models.ErrInternal
+		return 0, models.ErrDuplicateBanners
 	}
 
 	for _, tagID := range bannerData.TagIDs {
-		q = `INSERT INTO banner_definition(banner_id, feature_id, tag_id) VALUES($1, $2, $3);`
+		q = `INSERT INTO banner_definition(banner_id, feature_id, tag_id) VALUES($1, $2, $3) RETURNING banner_id;`
 
-		_, err = tx.Exec(q, bannerID, bannerData.FeatureID, tagID)
+		_, err := tx.Exec(q, bannerID, bannerData.FeatureID, tagID)
 		if err != nil {
+			log.Println(err.Error())
 			tx.Rollback()
-			return 0, models.ErrInternal
+			return 0, models.ErrDuplicateBanners
 		}
 	}
 	if err = tx.Commit(); err != nil {
+		log.Println(err.Error())
 		return 0, models.ErrInternal
 	}
 
@@ -71,8 +73,10 @@ func (r *BannerRepo) Get(ctx context.Context, params models.BannerDefinition) (m
 		return models.Banner{}, models.ErrInternal
 	}
 
+	result := make(map[string]interface{})
+	json.Unmarshal([]byte(bannerRow.Content), &result)
 	return models.Banner{
-		Content: bannerRow.Content,
+		Content: result,
 	}, nil
 }
 

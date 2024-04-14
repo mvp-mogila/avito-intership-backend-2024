@@ -47,7 +47,6 @@ func (u *BannerUsecase) Create(ctx context.Context, bannerData models.Banner) (i
 			return 0, utils.NewValidationError("invalid tag id")
 		}
 	}
-
 	return u.bannerRepo.Create(ctx, bannerData)
 }
 

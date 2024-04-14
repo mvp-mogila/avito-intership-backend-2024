@@ -66,15 +66,15 @@ func (h *BannerHandler) GetBanner(w http.ResponseWriter, r *http.Request) {
 	case errors.Is(err, models.ErrNoBanner):
 		utils.SendErrorResponse(w, http.StatusNotFound, "")
 		return
-	case errors.Is(err, models.ErrValidation):
-		utils.SendErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
 	case errors.Is(err, models.ErrInternal):
 		utils.SendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
+	case err != nil:
+		utils.SendErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
 	}
 
-	utils.SendSuccessResponse(w, http.StatusOK, banner)
+	utils.SendSuccessResponse(w, http.StatusOK, banner.Content)
 }
 
 func (h *BannerHandler) GetBanners(w http.ResponseWriter, r *http.Request) {
@@ -109,12 +109,12 @@ func (h *BannerHandler) CreateBanner(w http.ResponseWriter, r *http.Request) {
 	banner := dto.ConvertBannerDetailsToModel(requestData)
 	ID, err := h.bannerUsecase.Create(r.Context(), banner)
 
-	switch {
-	case errors.Is(err, models.ErrValidation):
+	if err != nil {
+		if errors.Is(err, models.ErrInternal) {
+			utils.SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 		utils.SendErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	case errors.Is(err, models.ErrInternal):
-		utils.SendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
