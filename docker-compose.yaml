@@ -1,0 +1,28 @@
+services:
+  redis:
+    image: 'redis'
+    restart: always
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo -n '' > /dev/tcp/127.0.0.1/6379"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    volumes:
+      - './redis-data:/data'
+  postgres:
+    image: postgres:16
+    volumes:
+      - './postgres-data:/postgres/data'
+    ports:
+      - '5432:5432'
+    user: postgres
+    environment:
+      - POSTGRES_DB=banners
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
