@@ -83,8 +83,7 @@ func (r *BannerRepo) Get(ctx context.Context, params models.BannerDefinition) (m
 func (r *BannerRepo) GetAll(ctx context.Context, limit, offset int) ([]models.Banner, error) {
 	q := `SELECT DISTINCT b.id, (SELECT ARRAY_AGG(tag_id) FROM banner_definition d WHERE d.banner_id = b.id) as tag_ids,
 	d.feature_id, b.content, b.is_active, b.created_at,	b.updated_at
-	FROM banner b JOIN banner_definition d ON b.id = d.banner_id
-	ORDER BY b.created_at DESC
+	FROM banner b JOIN banner_definition d ON b.id = d.banner_id ORDER BY b.created_at DESC
 	LIMIT $1 OFFSET $2;`
 
 	bannerRows := []dao.BannerTable{}
@@ -168,10 +167,51 @@ func (r *BannerRepo) GetFilteredByTag(ctx context.Context, tagID, limit, offset 
 	return banners, nil
 }
 
-// func (r *BannerRepo) Update(ctx context.Context, bannerID int, bannerData models.Banner) error {
-// 	q := ``
+func (r *BannerRepo) Update(ctx context.Context, bannerID int, bannerData models.Banner) error {
+	tx, err := r.bannerStorage.Begin(ctx, &sql.TxOptions{})
+	if err != nil {
+		log.Println(err.Error())
+		return models.ErrInternal
+	}
 
-// }
+	q := `UPDATE banner SET content = $1, is_active = $2 WHERE id = $3 RETURNING id;`
+
+	var bannerId int
+	err = tx.Get(&bannerId, q, bannerData.Content, bannerData.IsActive, bannerID)
+	if err != nil {
+		log.Println(err.Error())
+		tx.Rollback()
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.ErrNoBanner
+		}
+		return models.ErrInternal
+	}
+
+	q = `DELETE FROM banner_definition WHERE banner_id = $1 RETURNING banner_id;`
+	err = tx.Get(&bannerId, q, bannerID)
+	if err != nil {
+		log.Println(err.Error())
+		tx.Rollback()
+		return models.ErrInternal
+	}
+
+	for _, tagID := range bannerData.TagIDs {
+		q = `INSERT INTO banner_definition (banner_id, feature_id, tag_id) VALUES ($1, $2, $3)RETURNING banner_id;`
+
+		_, err := tx.Exec(q, bannerID, bannerData.FeatureID, tagID)
+		if err != nil {
+			log.Println(err.Error())
+			tx.Rollback()
+			return models.ErrValidation
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		log.Println(err.Error())
+		return models.ErrInternal
+	}
+
+	return nil
+}
 
 func (r *BannerRepo) Delete(ctx context.Context, bannerID int) error {
 	q := `DELETE FROM banner * WHERE id = $1 RETURNING id;`

@@ -15,7 +15,7 @@ type Banners interface {
 	GetFiltered(ctx context.Context, params models.BannerDefinition, limit, offset int) ([]models.Banner, error)
 	GetFilteredByTag(ctx context.Context, tagID, limit, offset int) ([]models.Banner, error)
 	GetFilteredByFeature(ctx context.Context, featureID, limit, offset int) ([]models.Banner, error)
-	// Update(ctx context.Context, bannerID int, bannerData models.Banner) error
+	Update(ctx context.Context, bannerID int, bannerData models.Banner) error
 	Delete(ctx context.Context, bannerID int) error
 }
 
@@ -112,18 +112,18 @@ func (u *BannerUsecase) GetFiltered(ctx context.Context, params models.BannerDef
 	}
 }
 
-// func (u *BannerUsecase) Update(ctx context.Context, bannerID int, bannerData models.Banner) error {
-// 	if err := utils.ValidatePositive(bannerData.FeatureID, true); err != nil {
-// 		return utils.NewValidationError("invalid feature id")
-// 	}
-// 	for _, tagID := range bannerData.TagIDs {
-// 		if err := utils.ValidatePositive(tagID, true); err != nil {
-// 			return utils.NewValidationError("invalid tag id")
-// 		}
-// 	}
+func (u *BannerUsecase) Update(ctx context.Context, bannerID int, bannerData models.Banner) error {
+	if err := utils.ValidatePositive(bannerData.FeatureID, true); err != nil {
+		return utils.NewValidationError("invalid feature id")
+	}
+	for _, tagID := range bannerData.TagIDs {
+		if err := utils.ValidatePositive(tagID, true); err != nil {
+			return utils.NewValidationError("invalid tag id")
+		}
+	}
 
-// 	return u.bannerRepo.Update(ctx, bannerID, bannerData)
-// }
+	return u.bannerRepo.Update(ctx, bannerID, bannerData)
+}
 
 func (u *BannerUsecase) Delete(ctx context.Context, bannerID int) error {
 	return u.bannerRepo.Delete(ctx, bannerID)
