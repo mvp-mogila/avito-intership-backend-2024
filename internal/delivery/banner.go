@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mvp-mogila/avito-intership-backend-2024/internal/delivery/dto"
 	"github.com/mvp-mogila/avito-intership-backend-2024/internal/models"
+	"github.com/mvp-mogila/avito-intership-backend-2024/internal/pkg/middleware"
 	"github.com/mvp-mogila/avito-intership-backend-2024/internal/pkg/utils"
 )
 
@@ -16,7 +17,7 @@ type Banners interface {
 	Create(ctx context.Context, bannerData models.Banner) (int, error)
 	Get(ctx context.Context, params models.BannerDefinition) (models.Banner, error)
 	GetFiltered(ctx context.Context, params models.BannerDefinition, limit, offset int) ([]models.Banner, error)
-	Update(ctx context.Context, bannerID int, bannerData models.Banner) error
+	// Update(ctx context.Context, bannerID int, bannerData models.Banner) error
 	Delete(ctx context.Context, bannerID int) error
 }
 
@@ -27,17 +28,17 @@ type BannerHandler struct {
 
 func NewBannerHandler(u Banners) *BannerHandler {
 	return &BannerHandler{
-		router:        mux.NewRouter(),
 		bannerUsecase: u,
 	}
 }
 
-func (h *BannerHandler) SetupRouting() {
+func (h *BannerHandler) SetupRouting(r *mux.Router) {
+	h.router = r.NewRoute().Subrouter()
 	h.router.HandleFunc("/user_banner", h.GetBanner).Methods(http.MethodGet)
-	h.router.HandleFunc("/banner", h.GetBanners).Methods(http.MethodGet)
-	h.router.HandleFunc("/banner", h.CreateBanner).Methods(http.MethodPost)
-	h.router.HandleFunc("/banner/{id:[0-9]+}", h.UpdateBanner).Methods(http.MethodPatch)
-	h.router.HandleFunc("/banner/{id:[0-9]+}", h.DeleteBanner).Methods(http.MethodDelete)
+	h.router.HandleFunc("/banner", middleware.Authorization(h.GetBanners)).Methods(http.MethodGet)
+	h.router.HandleFunc("/banner", middleware.Authorization(h.CreateBanner)).Methods(http.MethodPost)
+	// h.router.HandleFunc("/banner/{id:[0-9]+}", middleware.Authorization(h.UpdateBanner)).Methods(http.MethodPatch)
+	h.router.HandleFunc("/banner/{id:[0-9]+}", middleware.Authorization(h.DeleteBanner)).Methods(http.MethodDelete)
 }
 
 func (h *BannerHandler) GetBanner(w http.ResponseWriter, r *http.Request) {
@@ -123,37 +124,37 @@ func (h *BannerHandler) CreateBanner(w http.ResponseWriter, r *http.Request) {
 	utils.SendSuccessResponse(w, http.StatusCreated, responseData)
 }
 
-func (h *BannerHandler) UpdateBanner(w http.ResponseWriter, r *http.Request) {
-	var requestData dto.BannerDetails
-	err := utils.GetBannerData(r.Body, &requestData)
-	if err != nil {
-		utils.SendErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
+// func (h *BannerHandler) UpdateBanner(w http.ResponseWriter, r *http.Request) {
+// 	var requestData dto.BannerDetails
+// 	err := utils.GetBannerData(r.Body, &requestData)
+// 	if err != nil {
+// 		utils.SendErrorResponse(w, http.StatusBadRequest, err.Error())
+// 		return
+// 	}
 
-	bannerID, err := strconv.Atoi(mux.Vars(r)["id"])
-	if err != nil {
-		utils.SendErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
+// 	bannerID, err := strconv.Atoi(mux.Vars(r)["id"])
+// 	if err != nil {
+// 		utils.SendErrorResponse(w, http.StatusBadRequest, err.Error())
+// 		return
+// 	}
 
-	banner := dto.ConvertBannerDetailsToModel(requestData)
-	err = h.bannerUsecase.Update(r.Context(), bannerID, banner)
+// 	banner := dto.ConvertBannerDetailsToModel(requestData)
+// 	err = h.bannerUsecase.Update(r.Context(), bannerID, banner)
 
-	switch {
-	case errors.Is(err, models.ErrNoBanner):
-		utils.SendErrorResponse(w, http.StatusNotFound, "")
-		return
-	case errors.Is(err, models.ErrValidation):
-		utils.SendErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	case errors.Is(err, models.ErrInternal):
-		utils.SendErrorResponse(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+// 	switch {
+// 	case errors.Is(err, models.ErrNoBanner):
+// 		utils.SendErrorResponse(w, http.StatusNotFound, "")
+// 		return
+// 	case errors.Is(err, models.ErrValidation):
+// 		utils.SendErrorResponse(w, http.StatusBadRequest, err.Error())
+// 		return
+// 	case errors.Is(err, models.ErrInternal):
+// 		utils.SendErrorResponse(w, http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
 
-	w.WriteHeader(http.StatusOK)
-}
+// 	w.WriteHeader(http.StatusOK)
+// }
 
 func (h *BannerHandler) DeleteBanner(w http.ResponseWriter, r *http.Request) {
 	bannerID, err := strconv.Atoi(mux.Vars(r)["id"])
