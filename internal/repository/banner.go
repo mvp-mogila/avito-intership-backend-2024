@@ -81,7 +81,7 @@ func (r *BannerRepo) Get(ctx context.Context, params models.BannerDefinition) (m
 }
 
 func (r *BannerRepo) GetAll(ctx context.Context, limit, offset int) ([]models.Banner, error) {
-	q := `SELECT DISTINCT b.id, (SELECT ARRAY_AGG(tag_id)::int[] FROM banner_definition d WHERE d.banner_id = b.id) as tag_ids,
+	q := `SELECT DISTINCT b.id, (SELECT ARRAY_AGG(tag_id) FROM banner_definition d WHERE d.banner_id = b.id) as tag_ids,
 	d.feature_id, b.content, b.is_active, b.created_at,	b.updated_at
 	FROM banner b JOIN banner_definition d ON b.id = d.banner_id
 	ORDER BY b.created_at DESC
@@ -91,7 +91,7 @@ func (r *BannerRepo) GetAll(ctx context.Context, limit, offset int) ([]models.Ba
 	err := r.bannerStorage.Select(ctx, &bannerRows, q, limit, offset)
 
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		if len(bannerRows) == 0 {
 			return nil, models.ErrNoBanner
 		}
@@ -106,7 +106,7 @@ func (r *BannerRepo) GetFiltered(ctx context.Context, params models.BannerDefini
 	q := `SELECT DISTINCT b.id, (SELECT ARRAY_AGG(tag_id) FROM banner_definition d WHERE d.banner_id = b.id) as tag_ids,
 	d.feature_id, b.content, b.is_active, b.created_at,	b.updated_at
 	FROM banner b JOIN banner_definition d ON b.id = d.banner_id
-	where d.tag_id = $1 AND d.feature_id = $2
+	WHERE d.tag_id = $1 AND d.feature_id = $2
 	ORDER BY b.created_at DESC
 	LIMIT $3 OFFSET $4;`
 
@@ -127,8 +127,8 @@ func (r *BannerRepo) GetFiltered(ctx context.Context, params models.BannerDefini
 func (r *BannerRepo) GetFilteredByFeature(ctx context.Context, featureID, limit, offset int) ([]models.Banner, error) {
 	q := `SELECT DISTINCT b.id, (SELECT ARRAY_AGG(tag_id) FROM banner_definition d WHERE d.banner_id = b.id) as tag_ids,
 	d.feature_id, b.content, b.is_active, b.created_at,	b.updated_at
-	FROM banner b join banner_definition d on b.id = d.banner_id
-	where d.feature_id = $1
+	FROM banner b JOIN banner_definition d on b.id = d.banner_id
+	WHERE d.feature_id = $1
 	ORDER BY b.created_at DESC
 	LIMIT $2 OFFSET $3;`
 

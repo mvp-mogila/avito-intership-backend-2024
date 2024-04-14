@@ -106,7 +106,7 @@ func (u *BannerUsecase) GetFiltered(ctx context.Context, params models.BannerDef
 	case params.FeatureID != 0 && params.TagID == 0:
 		return u.bannerRepo.GetFilteredByFeature(ctx, params.FeatureID, limit, offset)
 	case params.FeatureID == 0 && params.TagID != 0:
-		return u.bannerRepo.GetFilteredByFeature(ctx, params.FeatureID, limit, offset)
+		return u.bannerRepo.GetFilteredByTag(ctx, params.TagID, limit, offset)
 	default:
 		return u.bannerRepo.GetAll(ctx, limit, offset)
 	}
