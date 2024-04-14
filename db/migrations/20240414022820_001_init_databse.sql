@@ -10,6 +10,22 @@ CREATE TABLE banner (
 	updated_at timestamp DEFAULT now() NOT NULL
 );
 
+-- function for banner updated_at
+CREATE FUNCTION update_time() RETURNS trigger AS $$
+BEGIN
+    UPDATE banner
+    SET updated_at = NOW()
+    WHERE id = OLD.id;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- trigger for banner updated_at
+CREATE TRIGGER updator
+AFTER UPDATE ON banner
+FOR EACH ROW
+EXECUTE PROCEDURE update_time();
+
 --banner_definition table
 CREATE TABLE banner_definition (
 	banner_id int NOT NULL REFERENCES banner(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -18,11 +34,17 @@ CREATE TABLE banner_definition (
 	CONSTRAINT banner_definition_pk PRIMARY KEY (feature_id,tag_id)
 );
 
+-- banner_id index
+CREATE INDEX banner_id_idx ON banner_definition(banner_id);
+
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
 
+DROP TRIGGER if EXISTS updator ON banner;
+DROP FUNCTION IF EXISTS update_time;
+DROP INDEX IF EXISTS banner_id_idx;
 DROP TABLE IF EXISTS banner_definition;
 DROP TABLE IF EXISTS banner;
 
