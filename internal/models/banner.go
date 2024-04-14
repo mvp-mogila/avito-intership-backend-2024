@@ -13,6 +13,7 @@ type Banner struct {
 }
 
 type BannerDefinition struct {
-	FeatureID int
-	TagID     int
+	FeatureID    int
+	TagID        int
+	LastRevision bool
 }
