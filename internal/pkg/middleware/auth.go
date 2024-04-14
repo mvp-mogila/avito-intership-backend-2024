@@ -22,15 +22,15 @@ func Authentication(userUsecase Users) mux.MiddlewareFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			token := r.Header.Get("token")
 
-			var ctx context.Context
+			ctx := r.Context()
 			if userUsecase.CheckAdmin(token) {
 				if strings.Contains(r.URL.String(), "user") {
 					utils.SendErrorResponse(w, http.StatusForbidden, "")
 					return
 				}
-				ctx = context.WithValue(context.Background(), AdminStatusKey{}, true)
+				ctx = context.WithValue(ctx, AdminStatusKey{}, true)
 			} else if userUsecase.CheckUser(token) {
-				ctx = context.WithValue(context.Background(), AdminStatusKey{}, false)
+				ctx = context.WithValue(ctx, AdminStatusKey{}, false)
 			} else {
 				utils.SendErrorResponse(w, http.StatusUnauthorized, "")
 				return

@@ -3,7 +3,6 @@ package delivery
 import (
 	"context"
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -39,7 +38,7 @@ func (h *BannerHandler) SetupRouting(r *mux.Router) {
 	h.router.HandleFunc("/banner", middleware.Authorization(h.GetBanners)).Methods(http.MethodGet)
 	h.router.HandleFunc("/banner", middleware.Authorization(h.CreateBanner)).Methods(http.MethodPost)
 	// h.router.HandleFunc("/banner/{id:[1-9]+[0-9]*}", middleware.Authorization(h.UpdateBanner)).Methods(http.MethodPatch)
-	h.router.HandleFunc("/banner/{id:[1-9]+[0-9]*}", middleware.Authorization(h.DeleteBanner)).Methods(http.MethodDelete)
+	h.router.HandleFunc("/banner/{id}", middleware.Authorization(h.DeleteBanner)).Methods(http.MethodDelete)
 }
 
 func (h *BannerHandler) GetBanner(w http.ResponseWriter, r *http.Request) {
@@ -158,8 +157,6 @@ func (h *BannerHandler) CreateBanner(w http.ResponseWriter, r *http.Request) {
 // }
 
 func (h *BannerHandler) DeleteBanner(w http.ResponseWriter, r *http.Request) {
-	args := mux.Vars(r)
-	log.Println(args)
 	bannerID, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
 		utils.SendErrorResponse(w, http.StatusBadRequest, err.Error())
