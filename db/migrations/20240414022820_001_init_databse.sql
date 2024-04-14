@@ -11,20 +11,18 @@ CREATE TABLE banner (
 );
 
 -- function for banner updated_at
-CREATE FUNCTION update_time() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION update_time()
+RETURNS TRIGGER AS $$
 BEGIN
-    UPDATE banner
-    SET updated_at = NOW()
-    WHERE id = OLD.id;
-    RETURN NULL;
+    NEW.updated_at = now();
+    RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ language 'plpgsql';
 
--- trigger for banner updated_at
+-- trigger for banner updated_at 
 CREATE TRIGGER updator
-AFTER UPDATE ON banner
-FOR EACH ROW
-EXECUTE PROCEDURE update_time();
+BEFORE UPDATE ON banner
+FOR EACH ROW EXECUTE FUNCTION update_time();
 
 --banner_definition table
 CREATE TABLE banner_definition (

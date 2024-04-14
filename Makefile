@@ -12,7 +12,7 @@ containers-down:
 	docker compose down
 
 migrations-up:
-go install github.com/pressly/goose/v3/cmd/goose@latest
+	go install github.com/pressly/goose/v3/cmd/goose@latest
 	goose -dir db/migrations postgres $(DB_DSN) up
 
 migrations-down:
